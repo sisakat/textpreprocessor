@@ -1,6 +1,0 @@
-keyword_functions.o: keyword_functions.cpp processor.h token.h keywords.h \
- keyword_functions.h
-processor.o: processor.cpp processor.h token.h keywords.h \
- keyword_functions.h util.h
-textpreprocessor.o: textpreprocessor.cpp processor.h token.h keywords.h \
- colormod.h
