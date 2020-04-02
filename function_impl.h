@@ -10,6 +10,7 @@
 std::string include(std::vector<token> parameters);
 std::string include_file(std::string filename);
 std::string include_dir(std::string path);
+std::string include_file_regex(std::string path, std::string pattern);
 std::string scope(std::vector<token> parameters);
 std::string echo(std::vector<token> parameters);
 std::string struppercase(std::vector<token> parameters);

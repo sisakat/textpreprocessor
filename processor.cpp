@@ -21,18 +21,18 @@ void process(string scope, string& line) {
     ostringstream oss;
 
     for (char& c : line) {
-        if (STARTEXPR == string { last, c }) {
+        if (lastchar && STARTEXPR == string { last, c }) {
             command_mode = true;
             lastchar = false;
             continue;
-        } else if (ENDEXPR == string { last, c }) {
+        } else if (lastchar && ENDEXPR == string { last, c }) {
             command_mode = false;
             invoke_command(oss.str());
             oss.str("");
             oss.clear();
             lastchar = false;
             continue;
-        } else if (command_mode && &c == &line.back()) {
+        } else if (lastchar && command_mode && &c == &line.back()) {
             oss << last;
             invoke_command(oss.str());
             oss.str("");
@@ -45,7 +45,8 @@ void process(string scope, string& line) {
             if (command_mode) {
                 oss << last;
             } else {
-                cout << last;
+                if (!debug)
+                    cout << last;
             }
         }
 
@@ -53,10 +54,10 @@ void process(string scope, string& line) {
         lastchar = true;
     }
 
-    if (lastchar)
+    if (lastchar && !debug)
         cout << last;
 
-    if (line.length() > 0 && !command_mode)
+    if (!command_mode)
         cout << endl;
 }
 

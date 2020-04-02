@@ -1,9 +1,17 @@
 #include <filesystem>
 #include <algorithm>
+#include <regex>
 #include "processor.h"
 #include "function_impl.h"
 
-using namespace std;
+using std::string;
+using std::vector;
+using std::ostringstream;
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::fstream;
+using std::ios;
 namespace fs = std::filesystem;
 
 string include(std::vector<token> parameters) {
@@ -11,14 +19,33 @@ string include(std::vector<token> parameters) {
         cerr << "ERROR: Expected filename after include";
         exit(2);
     }
-    string filename = parameters[0].value;
-    fs::path p(filename);
 
+    string filename = parameters[0].value;
+
+    if (parameters.size() > 1) {
+        string pattern = parameters[1].value;
+        return include_file_regex(filename, pattern);
+    }
+
+    fs::path p(filename);
     if (fs::is_directory(filename)) {
         return include_dir(filename);
     } else {
         return include_file(filename);
     }
+}
+
+string include_file_regex(string path, string pattern) {
+    ostringstream oss;
+
+    for (const auto &entry : fs::directory_iterator(path)) {
+        if (regex_match(entry.path().filename().string(), std::regex(pattern))) {
+            oss << include_file(entry.path().string());
+        }
+    }
+
+    return oss.str();
+    return "lol";
 }
 
 string include_file(std::string filename) {
@@ -29,7 +56,6 @@ string include_file(std::string filename) {
         string line;
         while (getline(f, line)) {
           process(filename, line);
-          os << endl;
         }
     } else {
         cerr << "ERROR: Could not open file '" << filename << "'";
