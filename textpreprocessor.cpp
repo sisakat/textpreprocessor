@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     if (f.is_open()) {
         string line;
         while (getline(f, line)) {
-            process(line);
+            process(string(argv[1]), line);
             cout << endl;
         }
     }
