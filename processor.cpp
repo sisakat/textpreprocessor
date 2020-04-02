@@ -53,8 +53,8 @@ void invoke_command(string command) {
 
     for (char& c : command) {
         if (c == '\"')
-            quote = not quote;
-        if (c != ' ' or quote) {
+            quote = !quote;
+        if ((c != ' ' || quote) && c != ';') {
             oss << c;
         } else if (oss.str().length() > 0) {
             tokens.push_back(token(oss.str()));
