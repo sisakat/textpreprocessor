@@ -11,7 +11,9 @@ void print_help();
 int main(int argc, char **argv) {
     if (argc < 2) {
         print_help();
+        return 0;
     }
+
     bool debug = false;
 
     for (int i = 1; i < argc-1; i++) {
@@ -45,5 +47,6 @@ void print_help() {
          << red 
          << "fatal error: " 
          << def 
-         << "no input files";
+         << "no input files"
+         << endl;
 }
