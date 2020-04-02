@@ -12,13 +12,13 @@ static const string STARTEXPR = "%?";
 static const string ENDEXPR   = "?%";
 static string filename        = "";
 
-bool command_mode = false;
+static bool command_mode = false;
 
 void process(string scope, string& line) {
-    filename = scope;
-    ostringstream oss;
+    filename = scope; 
     char last;
     bool lastchar = false;
+    ostringstream oss;
 
     for (char& c : line) {
         if (STARTEXPR == string { last, c }) {
@@ -27,6 +27,13 @@ void process(string scope, string& line) {
             continue;
         } else if (ENDEXPR == string { last, c }) {
             command_mode = false;
+            invoke_command(oss.str());
+            oss.str("");
+            oss.clear();
+            lastchar = false;
+            continue;
+        } else if (command_mode && &c == &line.back()) {
+            oss << last;
             invoke_command(oss.str());
             oss.str("");
             oss.clear();
@@ -48,10 +55,21 @@ void process(string scope, string& line) {
 
     if (lastchar)
         cout << last;
+
+    if (line.length() > 0 && !command_mode)
+        cout << endl;
 }
 
 string current_scope() {
     return filename;
+}
+
+static void push_back_token(vector<token>& tokens, ostringstream& oss) {
+    if (oss.str().length() > 0) {
+        tokens.push_back(token(oss.str()));
+        oss.str("");
+        oss.clear();
+    }
 }
 
 void invoke_command(string command) {
@@ -63,38 +81,33 @@ void invoke_command(string command) {
     for (char& c : command) {
         if (c == '\n')
             continue;
+
         if (c == '\"')
             quote = !quote;
         if ((c != ' ' || quote) && c != ';') {
-            if (c == '(') {
-                tokens.push_back(token(oss.str()));
-                oss.str("");
-                oss.clear();
+            if (quote) {
+                oss << c;
+            } else if (c == '(') {
+                push_back_token(tokens, oss);
                 tokens.push_back(token("(", token_type::op));
             } else if (c == ')') {
-                tokens.push_back(token(oss.str()));
-                oss.str("");
-                oss.clear();
+                push_back_token(tokens, oss);
                 tokens.push_back(token(")", token_type::op));
             } else if (c == ',') {
-                tokens.push_back(token(oss.str()));
-                oss.str("");
-                oss.clear();
+                push_back_token(tokens, oss);
                 tokens.push_back(token(",", token_type::op));  
+            } else if (c == ';') {
+                push_back_token(tokens, oss);
             } else {
-                oss << c;
+                oss << c;   
             }
         } else if (oss.str().length() > 0) {
-            tokens.push_back(token(oss.str()));
-            oss.str("");
-            oss.clear();
+            push_back_token(tokens, oss);
         }
     }
 
     if (oss.str().length() > 0) {
-        tokens.push_back(token(oss.str()));
-        oss.str("");
-        oss.clear();
+        push_back_token(tokens, oss);
     }
 
     interpret(move(tokens));
@@ -167,6 +180,9 @@ void interpret(vector<token> tokens) {
             if (tokens[i].type != token_type::op) {
                 function_parameters[function_names.top()].push_back(tokens[i]);
             }
+        } else {
+            cerr << "ERROR: unknown statement '" << tokens[i].value << "'" << endl;
+            exit(2);
         }
     }
 }

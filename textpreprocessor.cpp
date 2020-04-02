@@ -1,11 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
-#include <vector>
-#include <algorithm>
-#include <map>
-#include <functional>
 #include "processor.h"
 #include "colormod.h"
 
@@ -34,7 +29,6 @@ int main(int argc, char **argv) {
         string line;
         while (getline(f, line)) {
             process(string(argv[argc-1]), line);
-            cout << endl;
         }
     }
     if (debug) {

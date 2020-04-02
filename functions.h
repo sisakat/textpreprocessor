@@ -7,5 +7,6 @@ static std::vector<std::string> functions {
     "scope",
     "echo",
     "upper-case",
-    "lower-case"
+    "lower-case",
+    "newline"
 };

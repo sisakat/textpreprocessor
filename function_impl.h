@@ -20,5 +20,6 @@ static std::map<std::string, std::function<std::string(std::vector<token>)>> fun
     { "scope", scope },
     { "echo", echo },
     { "upper-case", struppercase },
-    { "lower-case", strlowercase }
+    { "lower-case", strlowercase },
+    { "newline", [](std::vector<token>) { return "\n"; }}
 };
