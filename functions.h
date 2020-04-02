@@ -5,5 +5,7 @@
 static std::vector<std::string> functions {
     "include",
     "scope",
-    "echo"
+    "echo",
+    "upper-case",
+    "lower-case"
 };

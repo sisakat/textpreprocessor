@@ -6,6 +6,8 @@
 
 using namespace std;
 
+static bool debug = false;
+
 static const string STARTEXPR = "%?";
 static const string ENDEXPR   = "?%";
 static string filename        = "";
@@ -98,6 +100,31 @@ void invoke_command(string command) {
     interpret(move(tokens));
 }
 
+static void debug_token(const token& t) {
+    cout << "<token>";
+    cout << "<value>" << t.value << "</value>";
+    cout << "<type>" << t.type << "</type>";
+    cout << "</token>";
+}
+
+static void debug_output(string output) {
+    cout << "<text>" << output << "</text>";
+}
+
+static void debug_function_call(string function_name, vector<token> parameters, string return_value) {
+    cout << "<function>";
+    cout << "<name>" << function_name << "</name>";
+    cout << "<parameters>";
+
+    for (int i = 0; i < parameters.size(); i++) {
+        debug_token(parameters[i]);
+    }
+
+    cout << "</parameters>";
+    cout << "<return>" << return_value << "</return>";
+    cout << "</function>";
+}
+
 void interpret(vector<token> tokens) {
     int function = 0;
     int paranthesis = 0;
@@ -118,11 +145,21 @@ void interpret(vector<token> tokens) {
                     string function_name = function_names.top();
                     string return_value = function_impl[function_name](function_parameters[function_name]);
                     function_names.pop();
+
+                    if (debug) {
+                        debug_function_call(function_name, function_parameters[function_name], return_value);
+                    }
+
                     function_parameters[function_name].clear();
+
                     if (function_names.size() > 0) {
                         function_parameters[function_names.top()].push_back(token(return_value, token_type::literal));
                     } else {
-                        cout << return_value;
+                        if (debug) {
+                            debug_output(return_value);
+                        } else {
+                            cout << return_value;
+                        }
                     }
                 }
             }
@@ -131,7 +168,9 @@ void interpret(vector<token> tokens) {
                 function_parameters[function_names.top()].push_back(tokens[i]);
             }
         }
-
-        //cout << tokens[i].value << " type: " << tokens[i].type << endl;
     }
+}
+
+void set_debug(bool state) {
+    debug = state;
 }

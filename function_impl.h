@@ -12,9 +12,13 @@ std::string include_file(std::string filename);
 std::string include_dir(std::string path);
 std::string scope(std::vector<token> parameters);
 std::string echo(std::vector<token> parameters);
+std::string struppercase(std::vector<token> parameters);
+std::string strlowercase(std::vector<token> parameters);
 
 static std::map<std::string, std::function<std::string(std::vector<token>)>> function_impl {
     { "include", include },
     { "scope", scope },
-    { "echo", echo }
+    { "echo", echo },
+    { "upper-case", struppercase },
+    { "lower-case", strlowercase }
 };

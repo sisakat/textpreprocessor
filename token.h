@@ -1,9 +1,31 @@
 #pragma once
 #include <algorithm>
+#include <ostream>
 #include <string>
 #include "functions.h"
 
 enum token_type { literal, op, function, variable };
+
+inline std::ostream& operator<<(std::ostream& os, const token_type t) {
+    switch(t) {
+        case token_type::literal:
+            os << "literal";
+            break;
+        case token_type::op:
+            os << "operator";
+            break;
+        case token_type::function:
+            os << "function";
+            break;
+        case token_type::variable:
+            os << "variable";
+            break;
+        default:
+            os << "generic";
+            break;
+    }
+    return os;
+}
 
 struct token {
     token_type type;

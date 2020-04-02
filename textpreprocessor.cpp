@@ -17,15 +17,28 @@ int main(int argc, char **argv) {
     if (argc < 2) {
         print_help();
     }
+    bool debug = false;
+
+    for (int i = 1; i < argc-1; i++) {
+        string input(argv[i]);
+        if (input == "-d") {
+            set_debug(true);
+            debug = true;
+            cout << "<textpreprocessor>" << endl;
+        }
+    }
 
     fstream f;
-    f.open(argv[1], ios::in);
+    f.open(argv[argc-1], ios::in);
     if (f.is_open()) {
         string line;
         while (getline(f, line)) {
-            process(string(argv[1]), line);
+            process(string(argv[argc-1]), line);
             cout << endl;
         }
+    }
+    if (debug) {
+        cout << "</textpreprocessor>";
     }
 }
 

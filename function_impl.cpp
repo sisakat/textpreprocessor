@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <algorithm>
 #include "processor.h"
 #include "function_impl.h"
 
@@ -32,15 +33,17 @@ string include_file(std::string filename) {
         }
     } else {
         cerr << "ERROR: Could not open file '" << filename << "'";
-        exit(2);
     }
+
     return os.str();
 }
 
 string include_dir(std::string path) {
+    ostringstream os;
     for (const auto &entry : fs::directory_iterator(path)) {
-        return include_file(entry.path().string());
+        os << include_file(entry.path().string());
     }
+    return os.str();
 }
 
 string scope(std::vector<token> parameters) {
@@ -53,4 +56,26 @@ std::string echo(std::vector<token> parameters) {
         os << param.value;
     }
     return os.str();
+}
+
+std::string struppercase(std::vector<token> parameters) {
+    ostringstream os;
+    for (const auto& param : parameters) {
+        os << param.value;
+    }
+    
+    string output = os.str();
+    std::transform(output.begin(), output.end(), output.begin(), toupper);
+    return output;
+}
+
+std::string strlowercase(std::vector<token> parameters) {
+    ostringstream os;
+    for (const auto& param : parameters) {
+        os << param.value;
+    }
+    
+    string output = os.str();
+    std::transform(output.begin(), output.end(), output.begin(), tolower);
+    return output;
 }
