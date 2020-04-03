@@ -8,5 +8,8 @@ static std::vector<std::string> functions {
     "echo",
     "upper-case",
     "lower-case",
-    "newline"
+    "newline",
+    "eq",
+    "neq",
+    "if"
 };

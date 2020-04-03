@@ -15,6 +15,9 @@ std::string scope(std::vector<token> parameters);
 std::string echo(std::vector<token> parameters);
 std::string struppercase(std::vector<token> parameters);
 std::string strlowercase(std::vector<token> parameters);
+std::string equals(std::vector<token> parameters);
+std::string nequals(std::vector<token> parameters);
+std::string if_function(std::vector<token> parameters);
 
 static std::map<std::string, std::function<std::string(std::vector<token>)>> function_impl {
     { "include", include },
@@ -22,5 +25,8 @@ static std::map<std::string, std::function<std::string(std::vector<token>)>> fun
     { "echo", echo },
     { "upper-case", struppercase },
     { "lower-case", strlowercase },
-    { "newline", [](std::vector<token>) { return "\n"; }}
+    { "newline", [](std::vector<token>) { return "\n"; }},
+    { "eq", equals },
+    { "neq", nequals },
+    { "if", if_function }
 };

@@ -55,7 +55,10 @@ string include_file(std::string filename) {
     if (f.is_open()) {
         string line;
         while (getline(f, line)) {
+          bool command_mode_tmp = command_mode;
+          command_mode = false;
           process(filename, line);
+          command_mode = command_mode_tmp;
         }
     } else {
         cerr << "ERROR: Could not open file '" << filename << "'";
@@ -104,4 +107,31 @@ std::string strlowercase(std::vector<token> parameters) {
     string output = os.str();
     std::transform(output.begin(), output.end(), output.begin(), tolower);
     return output;
+}
+
+std::string equals(std::vector<token> parameters) {
+    if (parameters.size() == 2) {
+        return parameters[0].value == parameters[1].value ? "true" : "false";
+    }
+    return "false";
+}
+
+std::string nequals(std::vector<token> parameters) {
+    if (parameters.size() == 2) {
+        return parameters[0].value == parameters[1].value ? "false" : "true";
+    }
+    return "false";
+}
+
+std::string if_function(std::vector<token> parameters) {
+    if (parameters.size() > 1) {
+        if (parameters[0].value == "true") {
+            return parameters[1].value;
+        } else {
+            if (parameters.size() > 2)
+                return parameters[2].value;
+            return "";
+        }
+    }
+    return "ERROR: if not well formed";
 }

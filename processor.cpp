@@ -12,9 +12,10 @@ static const string STARTEXPR = "%?";
 static const string ENDEXPR   = "?%";
 static string filename        = "";
 
-static bool command_mode = false;
+bool command_mode = false;
 
 void process(string scope, string& line) {
+    line += '\0';
     filename = scope; 
     char last;
     bool lastchar = false;
@@ -97,6 +98,12 @@ void invoke_command(string command) {
             } else if (c == ',') {
                 push_back_token(tokens, oss);
                 tokens.push_back(token(",", token_type::op));  
+            } else if (c == '$') {
+                push_back_token(tokens, oss);
+                tokens.push_back(token("$", token_type::op));
+            } else if (c == '=') {
+                push_back_token(tokens, oss);
+                tokens.push_back(token("=", token_type::op));
             } else if (c == ';') {
                 push_back_token(tokens, oss);
             } else {
@@ -139,23 +146,30 @@ static void debug_function_call(string function_name, vector<token> parameters, 
     cout << "</function>";
 }
 
-void interpret(vector<token> tokens) {
-    int function = 0;
-    int paranthesis = 0;
-    stack<string> function_names;
-    map<string, vector<token>> function_parameters;
+static int function_counter = 0;
+static int paranthesis = 0;
+static bool variable_counter = false;
+static string variable_name = "";
+static stack<string> function_names;
+static map<string, vector<token>> function_parameters;
+static map<string, string> variables;
 
+void interpret(vector<token> tokens) {
     for (unsigned int i = 0; i < tokens.size(); i++) {
         if (tokens[i].type == token_type::function) {
-            function++;
+            function_counter++;
             function_names.push(tokens[i].value);
         } else if (tokens[i].type == token_type::op) {
-            if (tokens[i].value == "(") {
+            if (tokens[i].value == ",") {
+                variable_counter = false;
+            } else if (tokens[i].value == "$") {
+                variable_counter = true;
+            } else if (tokens[i].value == "(") {
                 paranthesis++;
             } else if (tokens[i].value == ")") {
                 paranthesis--;
-                if (function > 0) {
-                    function--;
+                if (function_counter > 0) {
+                    function_counter--;
                     string function_name = function_names.top();
                     string return_value = function_impl[function_name](function_parameters[function_name]);
                     function_names.pop();
@@ -177,9 +191,20 @@ void interpret(vector<token> tokens) {
                     }
                 }
             }
-        } else if (function > 0 && paranthesis > 0) {
-            if (tokens[i].type != token_type::op) {
+        } else if (function_counter > 0 && paranthesis > 0) {
+            if (variable_counter && tokens[i+1].value != "=") {
+                variable_name = tokens[i].value;
+                function_parameters[function_names.top()].push_back(token(variables[variable_name], token_type::literal));
+                variable_counter = false;
+            } else if (tokens[i].type != token_type::op) {
                 function_parameters[function_names.top()].push_back(tokens[i]);
+            }
+        } else if (variable_counter && function_counter == 0) {
+            if (tokens[i].type == token_type::literal) {
+                variables[variable_name] = tokens[i].value;
+                variable_counter = false;
+            } else {
+                variable_name = tokens[i].value;
             }
         } else {
             cerr << "ERROR: unknown statement '" << tokens[i].value << "'" << endl;
