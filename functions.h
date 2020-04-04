@@ -1,15 +1,7 @@
 #pragma once
-#include <vector>
 #include <string>
+#include <vector>
 
-static std::vector<std::string> functions {
-    "include",
-    "scope",
-    "echo",
-    "upper-case",
-    "lower-case",
-    "newline",
-    "eq",
-    "neq",
-    "if"
-};
+static std::vector<std::string> functions{"include",    "scope",      "echo",
+                                          "upper-case", "lower-case", "newline",
+                                          "eq",         "neq",        "if"};

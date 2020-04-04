@@ -1,11 +1,11 @@
 #pragma once
+#include "token.h"
+#include <fstream>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <string>
-#include <functional>
 #include <vector>
-#include <fstream>
-#include "token.h"
 
 std::string include(std::vector<token> parameters);
 std::string include_file(std::string filename);
@@ -19,14 +19,13 @@ std::string equals(std::vector<token> parameters);
 std::string nequals(std::vector<token> parameters);
 std::string if_function(std::vector<token> parameters);
 
-static std::map<std::string, std::function<std::string(std::vector<token>)>> function_impl {
-    { "include", include },
-    { "scope", scope },
-    { "echo", echo },
-    { "upper-case", struppercase },
-    { "lower-case", strlowercase },
-    { "newline", [](std::vector<token>) { return "\n"; }},
-    { "eq", equals },
-    { "neq", nequals },
-    { "if", if_function }
-};
+static std::map<std::string, std::function<std::string(std::vector<token>)>>
+    function_impl{{"include", include},
+                  {"scope", scope},
+                  {"echo", echo},
+                  {"upper-case", struppercase},
+                  {"lower-case", strlowercase},
+                  {"newline", [](std::vector<token>) { return "\n"; }},
+                  {"eq", equals},
+                  {"neq", nequals},
+                  {"if", if_function}};

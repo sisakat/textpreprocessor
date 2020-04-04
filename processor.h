@@ -1,8 +1,8 @@
 #pragma once
+#include "token.h"
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include "token.h"
 
 extern bool command_mode;
 
