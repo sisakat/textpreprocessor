@@ -2,3 +2,4 @@
 #include <string>
 
 std::string trim(const std::string& str, const std::string& whitespace = " \t");
+bool digits_only(const std::string& str);

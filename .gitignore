@@ -2,3 +2,5 @@ tpp.exe
 tpp
 *.o
 .depend
+test.txt
+*.obj

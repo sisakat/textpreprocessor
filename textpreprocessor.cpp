@@ -1,5 +1,5 @@
 #include "colormod.h"
-#include "processor.h"
+#include "tokenizer.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -14,28 +14,18 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  bool debug = false;
-
   for (int i = 1; i < argc - 1; i++) {
     string input(argv[i]);
     if (input == "-d") {
       set_debug(true);
-      debug = true;
-      cout << "<textpreprocessor>" << endl;
     }
   }
 
-  fstream f;
-  f.open(argv[argc - 1], ios::in);
-  if (f.is_open()) {
-    string line;
-    while (getline(f, line)) {
-      process(string(argv[argc - 1]), line);
-    }
-  }
-  if (debug) {
-    cout << "</textpreprocessor>";
-  }
+  string filename = argv[argc - 1];
+  ifstream f(filename);
+  string contents((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+  auto tokens = tokenize(filename, contents);
+  cout << tokens << endl;
 }
 
 void print_help() {
