@@ -18,6 +18,7 @@ std::string strlowercase(std::vector<token> parameters);
 std::string equals(std::vector<token> parameters);
 std::string nequals(std::vector<token> parameters);
 std::string if_function(std::vector<token> parameters);
+std::string bool_function(std::vector<token> parameters);
 
 static std::map<std::string, std::function<std::string(std::vector<token>)>>
     function_impl{{"include", include},
@@ -28,4 +29,5 @@ static std::map<std::string, std::function<std::string(std::vector<token>)>>
                   {"newline", [](std::vector<token>) { return "\n"; }},
                   {"eq", equals},
                   {"neq", nequals},
-                  {"if", if_function}};
+                  {"if", if_function},
+                  {"while", bool_function}};

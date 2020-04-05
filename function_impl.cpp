@@ -133,3 +133,10 @@ std::string if_function(std::vector<token> parameters) {
   }
   return "ERROR: if not well formed";
 }
+
+std::string bool_function(std::vector<token> parameters) {
+  if (parameters.size() > 0) {
+    return parameters[0].value == "true" ? "true" : "false";
+  }
+  return "false";
+}

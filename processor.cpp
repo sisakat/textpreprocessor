@@ -72,10 +72,11 @@ static void push_back_token(vector<token>& tokens, ostringstream& oss) {
   }
 }
 
+vector<token> invoke_tokens;
 void invoke_command(string command) {
+  int start_index = invoke_tokens.size();
   command = trim(command);
   ostringstream oss;
-  vector<token> tokens;
   bool quote = false;
 
   for (char& c : command) {
@@ -88,36 +89,42 @@ void invoke_command(string command) {
       if (quote) {
         oss << c;
       } else if (c == '(') {
-        push_back_token(tokens, oss);
-        tokens.push_back(token("(", token_type::op));
+        push_back_token(invoke_tokens, oss);
+        invoke_tokens.push_back(token("(", token_type::op));
       } else if (c == ')') {
-        push_back_token(tokens, oss);
-        tokens.push_back(token(")", token_type::op));
+        push_back_token(invoke_tokens, oss);
+        invoke_tokens.push_back(token(")", token_type::op));
+      } else if (c == '{') {
+        push_back_token(invoke_tokens, oss);
+        invoke_tokens.push_back(token("{", token_type::op));
+      } else if (c == '}') {
+        push_back_token(invoke_tokens, oss);
+        invoke_tokens.push_back(token("}", token_type::op));
       } else if (c == ',') {
-        push_back_token(tokens, oss);
-        tokens.push_back(token(",", token_type::op));
+        push_back_token(invoke_tokens, oss);
+        invoke_tokens.push_back(token(",", token_type::op));
       } else if (c == '$') {
-        push_back_token(tokens, oss);
-        tokens.push_back(token("$", token_type::op));
+        push_back_token(invoke_tokens, oss);
+        invoke_tokens.push_back(token("$", token_type::op));
       } else if (c == '=') {
-        push_back_token(tokens, oss);
-        tokens.push_back(token("=", token_type::op));
+        push_back_token(invoke_tokens, oss);
+        invoke_tokens.push_back(token("=", token_type::op));
       } else if (c == ';') {
-        push_back_token(tokens, oss);
-        tokens.push_back(token(";", token_type::op));
+        push_back_token(invoke_tokens, oss);
+        invoke_tokens.push_back(token(";", token_type::op));
       } else {
         oss << c;
       }
     } else if (oss.str().length() > 0) {
-      push_back_token(tokens, oss);
+      push_back_token(invoke_tokens, oss);
     }
   }
 
   if (oss.str().length() > 0) {
-    push_back_token(tokens, oss);
+    push_back_token(invoke_tokens, oss);
   }
 
-  interpret(move(tokens));
+  interpret(invoke_tokens, start_index);
 }
 
 static void debug_token(const token& t) {
@@ -154,83 +161,67 @@ static string variable_name = "";
 static stack<string> function_names;
 static map<string, vector<token>> function_parameters;
 static map<string, string> variables;
+static int next_token_index = -1;
+static int loop_index = -1;
 
-void interpret(vector<token> tokens) {
+void interpret_seperator(token& tok);
+void interpret_semicolon(token& tok);
+void interpret_dollar(token& tok);
+void interpret_assignment(token& tok);
+void interpret_paranthesis(token& tok);
+void interpret_curlybracket(token& tok);
+
+void interpret(vector<token>& tokens, int start_index) {
   if (debug) {
-    for (const token& t : tokens) {
-      debug_token(t);
+    for (int i = start_index; i < tokens.size(); i++) {
+      debug_token(tokens[i]);
       cout << endl;
     }
     cout << endl;
   }
 
-  for (unsigned int i = 0; i < tokens.size(); i++) {
+  for (unsigned int i = start_index; i < tokens.size(); i++) {
     if (tokens[i].type == token_type::function) {
+      if (tokens[i].value == "while") {
+        loop_index = i; 
+      }
       function_counter++;
       function_names.push(tokens[i].value);
     } else if (tokens[i].type == token_type::op) {
-      if (tokens[i].value == ",") {
-        variable_counter = false;
-      } else if (tokens[i].value == "$") {
-        variable_counter = true;
-      } else if (tokens[i].value == "=") {
-        function_counter++;
-        function_names.push(variable_name);
-        assignment = true;
-      } else if (tokens[i].value == ";") {
-        if (assignment) {
-          variables[variable_name] =
-              function_parameters[variable_name][0].value;
-          assignment = false;
-          function_counter--;
-          function_names.pop();
-        }
-      } else if (tokens[i].value == "(") {
-        paranthesis++;
-      } else if (tokens[i].value == ")") {
-        paranthesis--;
-        if (function_counter > 0) {
-          function_counter--;
-          string function_name = function_names.top();
-          string return_value =
-              function_impl[function_name](function_parameters[function_name]);
-          function_names.pop();
+      auto curr_tok = tokens[i];
+      auto curr_val = curr_tok.value;
 
-          if (debug) {
-            debug_function_call(function_name,
-                                function_parameters[function_name],
-                                return_value);
-          }
-
-          function_parameters[function_name].clear();
-
-          if (function_names.size() > 0) {
-            function_parameters[function_names.top()].push_back(
-                token(return_value, token_type::literal));
-          } else {
-            if (debug) {
-              debug_output(return_value);
-            } else {
-              cout << return_value;
-            }
-          }
-        }
+      if (curr_val == ",") {
+        interpret_seperator(curr_tok);
+      } else if (curr_val == ";") {
+        interpret_semicolon(curr_tok);
+      } else if (curr_val == "$") {
+        interpret_dollar(curr_tok);
+      } else if (curr_val == "=") {
+        interpret_assignment(curr_tok);
+      } else if (curr_val == "(" || curr_val == ")") {
+        interpret_paranthesis(curr_tok);
+      } else if (curr_val == "{" || curr_val == "}") {
+        interpret_curlybracket(curr_tok);
       }
     } else if (function_counter > 0) {
       if (variable_counter && !assignment) {
+        // variable mode but no assignment
+        // equals usage of variable
         variable_name = tokens[i].value;
         function_parameters[function_names.top()].push_back(
             token(variables[variable_name], token_type::literal));
         variable_counter = false;
       } else if (variable_counter && assignment &&
                  function_names.top() == variable_name) {
+        // variable mode and assignment
+        // and current function level is the variable
         if (tokens[i].type == token_type::literal) {
           variables[variable_name] = tokens[i].value;
         } else {
           variables[variable_name] =
               function_parameters[function_names.top()][0].value;
         }
-
         function_names.pop();
         function_counter--;
         variable_counter = false;
@@ -243,6 +234,85 @@ void interpret(vector<token> tokens) {
     } else {
       cerr << "ERROR: unknown statement '" << tokens[i].value << "'" << endl;
       exit(2);
+    }
+
+    if (next_token_index != -1) {
+      i = next_token_index - 1;
+      next_token_index = -1;
+    }
+  }
+}
+
+void interpret_seperator(token& tok) {
+  // disable variable mode
+  variable_counter = false;
+}
+
+void interpret_semicolon(token& tok) {
+  if (assignment) {
+    variables[variable_name] = function_parameters[variable_name][0].value;
+    assignment = false;
+    function_counter--;
+    function_names.pop();
+  }
+}
+
+void interpret_dollar(token& tok) {
+  // enable variable mode
+  variable_counter = true;
+}
+
+void interpret_assignment(token& tok) {
+  function_counter++;
+  function_names.push(variable_name);
+  assignment = true;
+}
+
+void interpret_paranthesis(token& tok) {
+  if (tok.value == "(") {
+    paranthesis++;
+  } else {
+    paranthesis--;
+    if (function_counter > 0) {
+      function_counter--;
+      string function_name = function_names.top();
+      string return_value =
+          function_impl[function_name](function_parameters[function_name]);
+      function_names.pop();
+
+      if (debug) {
+        debug_function_call(function_name, function_parameters[function_name],
+                            return_value);
+      }
+
+      function_parameters[function_name].clear();
+
+      if (function_names.size() > 0) {
+        function_parameters[function_names.top()].push_back(
+            token(return_value, token_type::literal));
+      } else {
+        if (debug) {
+          debug_output(return_value);
+        } else {
+          if (function_name != "while") {
+            cout << return_value;
+          }
+        }
+      }
+
+      if (function_name == "while" && return_value == "false") {
+        loop_index = -1;
+      }
+    }
+  }
+}
+
+void interpret_curlybracket(token& tok) {
+  if (tok.value == "{") {
+
+  } else {
+    if (loop_index != -1) {
+      next_token_index = loop_index; 
     }
   }
 }
