@@ -1,5 +1,6 @@
 #include "colormod.h"
 #include "tokenizer.h"
+#include "configuration.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -17,7 +18,7 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc - 1; i++) {
     string input(argv[i]);
     if (input == "-d") {
-      set_debug(true);
+      set_config(config_type::debug_token);
     }
   }
 
@@ -25,7 +26,10 @@ int main(int argc, char** argv) {
   ifstream f(filename);
   string contents((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
   auto tokens = tokenize(filename, contents);
-  cout << tokens << endl;
+
+  if (is_config_set(config_type::debug_token)) {
+    cout << tokens << endl;
+  }
 }
 
 void print_help() {

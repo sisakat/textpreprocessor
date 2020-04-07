@@ -7,8 +7,6 @@
 
 using namespace std;
 
-static bool debug = false;
-
 vector<token> tokenize(std::string filename, std::string& input) {
   vector<token> tokens;
   int position = 0;
@@ -120,5 +118,3 @@ ostream& operator<<(ostream& os, const vector<token> tokens) {
   }
   return os;
 }
-
-void set_debug(bool state) { debug = state; }
