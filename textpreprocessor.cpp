@@ -4,7 +4,9 @@
 #include "tokenizer.h"
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -18,8 +20,10 @@ int main(int argc, char** argv) {
 
   for (int i = 1; i < argc - 1; i++) {
     string input(argv[i]);
-    if (input == "-d") {
+    if (input == "-dt") {
       set_config(config_type::debug_token);
+    } else if (input == "-dp") {
+      set_config(config_type::debug_parse);
     }
   }
 
@@ -27,10 +31,15 @@ int main(int argc, char** argv) {
   ifstream f(filename);
   string contents((std::istreambuf_iterator<char>(f)),
                   std::istreambuf_iterator<char>());
-  auto tokens = tokenize(filename, contents);
 
+  auto tokens = tokenize(filename, contents);
   if (is_config_set(config_type::debug_token)) {
     cout << tokens << endl;
+  }
+
+  auto stmts = parse(tokens);
+  if (is_config_set(config_type::debug_parse) || true) {
+    cout << stmts << endl;
   }
 }
 
