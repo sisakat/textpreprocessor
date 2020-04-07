@@ -6,52 +6,6 @@
 #include <vector>
 
 /* ************************************ */
-/* Operator Types                       */
-/* ************************************ */
-enum assignment_op_type {
-  equal,
-  plus_equal,
-  minus_equal,
-  times_equal,
-  divide_equal
-};
-
-enum binary_op_type { plus, minus, divide, times };
-
-enum unary_op_type { negate };
-
-/* ************************************ */
-/* Operator classes                     */
-/* ************************************ */
-struct ast_op {
-  virtual ~ast_op() = default;
-};
-
-struct assignment_op : public ast_op {
-  assignment_op_type op = assignment_op_type::equal;
-  assignment_op() {}
-  assignment_op(assignment_op_type op) : op{op} {}
-
-  friend std::ostream& operator<<(std::ostream& os, const assignment_op& aop);
-};
-
-struct binary_op : public ast_op {
-  binary_op_type op;
-  binary_op() {}
-  binary_op(binary_op_type op) : op{op} {}
-
-  friend std::ostream& operator<<(std::ostream& os, const binary_op& bop);
-};
-
-struct unary_op : public ast_op {
-  unary_op_type op;
-  unary_op() {}
-  unary_op(unary_op_type op) : op{op} {}
-
-  friend std::ostream& operator<<(std::ostream& os, const unary_op& uop);
-};
-
-/* ************************************ */
 /* Base constructs                      */
 /* ************************************ */
 struct statement {
@@ -101,12 +55,12 @@ struct ite : public statement {
 };
 
 struct assignment : public statement {
-  assignment_op op;
+  token op;
   std::unique_ptr<lval> lvalue;
   std::unique_ptr<expression> rvalue;
 
   assignment() {}
-  assignment(assignment_op op, std::unique_ptr<lval> lvalue,
+  assignment(token op, std::unique_ptr<lval> lvalue,
              std::unique_ptr<expression> rvalue)
       : op{op}, lvalue{std::move(lvalue)}, rvalue{std::move(rvalue)} {}
   void print() const override;
@@ -116,20 +70,20 @@ struct assignment : public statement {
 /* Expressions                          */
 /* ************************************ */
 struct binary : public expression {
-  binary_op op;
+  token op;
   std::unique_ptr<expression> left;
   std::unique_ptr<expression> right;
   binary(std::unique_ptr<expression> left, std::unique_ptr<expression> right,
-         binary_op op)
+         token op)
       : op{op}, left{std::move(left)}, right{std::move(right)} {}
 
   void print() const override;
 };
 
 struct unary : public expression {
-  unary_op op;
+  token op;
   std::unique_ptr<expression> expr;
-  unary(std::unique_ptr<expression> expr, unary_op op)
+  unary(std::unique_ptr<expression> expr, token op)
       : op{op}, expr{std::move(expr)} {}
 
   void print() const override;

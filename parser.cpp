@@ -75,11 +75,6 @@ operator<<(std::ostream& os,
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const assignment_op& aop) {
-  os << aop.op;
-  return os;
-}
-
 void unary::print() const {
   cout << "unary: ";
   expr->print();
@@ -116,15 +111,5 @@ void lval::print() const { cout << *var; }
 
 std::ostream& operator<<(std::ostream& os, const variable& var) {
   os << var.identifier;
-  return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const unary_op& uop) {
-  os << uop.op;
-  return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const binary_op& bop) {
-  os << bop.op;
   return os;
 }
