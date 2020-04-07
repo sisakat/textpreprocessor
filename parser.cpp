@@ -21,48 +21,26 @@ void parse_expression(StatementsContainer& statements, TokenContainer& tokens,
 void parse_condition(StatementsContainer& statements, TokenContainer& tokens,
                      int i) {}
 
-void parse_identifier(StatementsContainer& statements, TokenContainer& tokens,
-                      int i) {
-  unique_ptr<variable> var = make_unique<variable>(tokens[i].value);
-  assignment_op aop(assignment_op_type::equal);
-  if (tokens[i + 1].type != token_type::op &&
-      tokens[i + 1].type != token_type::symbol) {
-    std::cerr << "Expected operator at " << tokens[i + 1].position << " in "
-              << tokens[i + 1].filename << std::endl;
-    exit(1);
-  } else {
-    string val = tokens[i + 1].value;
-    if (val == "+=") {
-      aop = assignment_op(assignment_op_type::plus_equal);
-    } else if (val == "-=") {
-      aop = assignment_op(assignment_op_type::minus_equal);
-    } else if (val == "*=") {
-      aop = assignment_op(assignment_op_type::times_equal);
-    } else if (val == "/=") {
-      aop = assignment_op(assignment_op_type::divide_equal);
-    } else if (val != "=") {
-      parse_condition(statements, tokens, i);
-    }
+int parse_block(StatementsContainer& statements, TokenContainer& tokens, int i) {
+  while (i < token.size()) {
+    i = parse_statement(statements, tokens, i); 
+    i++;
   }
+}
 
-  auto lval_var = make_unique<lval>(move(var));
-  auto expr = make_unique<expression>();
-  statements.push_back(
-      std::make_unique<assignment>(aop, move(lval_var), move(expr)));
+int parse_statement(StatementsContainer& statements, TokenContainer& tokens, int i) {
+  if (tokens[i].symbol == token_symbol::lcurly) {
+    parse_block(statements, tokens, i+1);
+  }
 }
 
 vector<std::unique_ptr<statement>> parse(vector<token> tokens) {
   vector<std::unique_ptr<statement>> statements;
   int i = 0;
-
-  while (i < tokens.size()) {
-    if (tokens[i].type == token_type::identifier) {
-      parse_identifier(statements, tokens, i);
-    }
-
+  while (i < token.size()) {
+    i = parse_statement(statements, tokens, i); 
     i++;
   }
-
   return statements;
 }
 
