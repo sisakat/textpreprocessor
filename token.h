@@ -4,14 +4,7 @@
 #include <ostream>
 #include <string>
 
-enum token_type { 
-  constant,
-  keyword,
-  op,
-  identifier,
-  symbol,
-  unknown
- };
+enum token_type { constant, keyword, op, identifier, symbol, unknown };
 
 inline std::ostream& operator<<(std::ostream& os, const token_type t) {
   switch (t) {
@@ -42,7 +35,7 @@ struct token {
   std::string value;
   std::string filename;
   int position;
-  token() : type { token_type::unknown } {}
+  token() : type{token_type::unknown} {}
   token(std::string value, token_type type, std::string filename, int position)
       : value{value}, type{type}, filename{filename}, position{position} {}
 };

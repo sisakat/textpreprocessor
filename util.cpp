@@ -20,6 +20,6 @@ bool digits_only(const std::string& str) {
         count++;
     }
   }
-  
+
   return count == str.length();
 }

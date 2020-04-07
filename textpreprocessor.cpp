@@ -1,6 +1,7 @@
 #include "colormod.h"
-#include "tokenizer.h"
 #include "configuration.h"
+#include "parser.h"
+#include "tokenizer.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -24,7 +25,8 @@ int main(int argc, char** argv) {
 
   string filename = argv[argc - 1];
   ifstream f(filename);
-  string contents((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+  string contents((std::istreambuf_iterator<char>(f)),
+                  std::istreambuf_iterator<char>());
   auto tokens = tokenize(filename, contents);
 
   if (is_config_set(config_type::debug_token)) {
